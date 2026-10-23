@@ -45,8 +45,8 @@ Now let's jump back to the serious stuff: how to make this app run on your local
 ### Running this App
 
 1. Run "npm install" to install the dependencies for the app such as axios and express.
-2. Run "DB_PASSWORD=yourpassword node server.js" to start the backend server. If this works without throwing an error then it means you did the database part right.
-3. Run "npm start" IN A SEPARATE TERMINAL to start the react app. The website should now be visible in port 3000 and should be loading in data from the server on the rankings page.
+2. Run "DB_PASSWORD=yourpassword npm start" to start the backend server. If this works without throwing an error then it means you did the database part right.
+3. Run "npm run dev" IN A SEPARATE TERMINAL to start the react app. The website should now be visible in port 3000 and should be loading in data from the server on the rankings page.
 4. Google login is configured to only work on localhost and localhost:3000.
 
 The navbar may not be fully visible if your window is not maximized.

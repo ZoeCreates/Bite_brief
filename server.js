@@ -28,6 +28,7 @@ const COOKIE_SECRET =
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); //necessary for it to process post request which contain data
 app.use(cookieParser(COOKIE_SECRET));
+app.set("trust proxy", 1); //hosting platforms put the app behind an https proxy
 
 let db;
 
@@ -377,7 +378,12 @@ app.post("/api/user", handle(async (req, res) => {
   }
 
   const cuid = Number(users[0].id);
-  res.cookie("curUserId", cuid, { signed: true, httpOnly: true, sameSite: "lax" });
+  res.cookie("curUserId", cuid, {
+    signed: true,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: req.secure,
+  });
   console.log("curUserID dredged from database in api/signup %s", cuid);
   res.json({ userID: cuid });
 }));
@@ -440,6 +446,16 @@ app.post('/api/user/userIndices', handle(async (req, res) => {
   res.json({ message: "success" });
 }));
 
+//in production the server also hands out the built react app (npm run build)
+const buildDir = path.join(__dirname, "build");
+app.use(express.static(buildDir));
+app.get(/^(?!\/api\/).*/, (req, res, next) => {
+  //let react-router handle pages like /myprofile
+  res.sendFile(path.join(buildDir, "index.html"), (err) => {
+    if (err) next();
+  });
+});
+
 app.use((err, req, res, next) => {
   console.error(`Error in ${req.method} ${req.path}:`, err);
   if (res.headersSent) {
@@ -452,14 +468,21 @@ app.use((err, req, res, next) => {
 
 async function initialize() {
   //set DB_HOST, DB_USER, DB_PASSWORD and DB_NAME to match your mySQL setup
-  const connection = await mysql.createConnection({
-    host: process.env.DB_HOST || "localhost",
-    user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "",
-    database: process.env.DB_NAME || "default_db", //usr/local/mysql/bin/mysql -u root -e "CREATE DATABASE IF NOT EXISTS default_db" -p
-    multipleStatements: false, //protected against sql injections
-  });
-  console.log("connected as id " + connection.threadId);
+  //a pool reconnects on its own if the database drops an idle connection.
+  //DATABASE_URL / MYSQL_URL (e.g. mysql://user:pass@host:3306/db) win over the separate settings
+  const databaseUrl = process.env.DATABASE_URL || process.env.MYSQL_URL;
+  const connection = databaseUrl
+    ? mysql.createPool({ uri: databaseUrl, multipleStatements: false })
+    : mysql.createPool({
+        host: process.env.DB_HOST || "localhost",
+        port: Number(process.env.DB_PORT) || 3306,
+        user: process.env.DB_USER || "root",
+        password: process.env.DB_PASSWORD || "",
+        database: process.env.DB_NAME || "default_db", //usr/local/mysql/bin/mysql -u root -e "CREATE DATABASE IF NOT EXISTS default_db" -p
+        multipleStatements: false, //protected against sql injections
+      });
+  await connection.query("SELECT 1"); //fail early if the database can't be reached
+  console.log("connected to database");
 
   //I labeled the helper tables in alphabetical order, btw
   await connection.execute("DROP TABLE IF EXISTS Foods_Users;");
