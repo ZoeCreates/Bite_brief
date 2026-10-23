@@ -16,7 +16,7 @@ function EnterDish({ handleSearchChange }) {
           onChange={handleSearchChange}
         />
         <button type="submit">
-          <i class="fa fa-search"></i>
+          <i className="fa fa-search"></i>
         </button>
         {/* Connect to backend database to fetch favorite dish */}
       </div>
@@ -207,12 +207,10 @@ function YourAllergies({
         {" "}
         Remove{" "}
       </button>
-      <p1> How would you rate the severity of this allergy? </p1>
+      <span> How would you rate the severity of this allergy? </span>
       <select onChange={(event) => {
-        updateAllergyIndex(allergies[index].id, event.target.value); 
-        console.log("allergyIndices[i] %i", allergyIndices[index])}
-    
-      } value={allergyIndices[allergies[index].id]}>
+        updateAllergyIndex(allergies[index].id, Number(event.target.value));
+      }} value={allergyIndices[allergies[index].id] || 0}>
         <option value={0}>Rate Severity 1-3</option>
         <option value={1}>1- Barely notice it</option>
         <option value={2}>2- Problematic</option>
@@ -249,19 +247,19 @@ function AddFunFact({funFact, setFunFact, handleSubmit}) {
 
 export default function Myprofile() {
   const [typedText, setText] = useState("");
-  const [matchMeals, setMatchMeals] = useState([Array(9).fill(null)]);
+  const [matchMeals, setMatchMeals] = useState([]);
   const [searchPerformed, setSearchPerformed] = useState(false);
-  const [leftAllergies, setLeftAllergies] = useState([Array().fill(null)]);
-  const [leftDiets, setLeftDiets] = useState([Array().fill(null)]);
+  const [leftAllergies, setLeftAllergies] = useState([]);
+  const [leftDiets, setLeftDiets] = useState([]);
   const [funFact, setFunFact] = useState("");
 
   ////////////Beatrice:
   //get this user's favorite foods from the server
   const [userID, setUserID] = useState(0);
   const [reRender, setReRender] = useState(true);
-  const [favFoods, setFavFoods] = useState([Array().fill(null)]);
-  const [userAllergies, setUserAllergies] = useState([Array().fill(null)]);
-  const [userDiets, setUserDiets] = useState([Array().fill(null)]);
+  const [favFoods, setFavFoods] = useState([]);
+  const [userAllergies, setUserAllergies] = useState([]);
+  const [userDiets, setUserDiets] = useState([]);
   const [userIndices, setUserIndices] = useState(Array(20).fill(0)); //max 20 allergies
 
 
@@ -324,23 +322,8 @@ export default function Myprofile() {
         error.response ? error.response.data : error
       );
     }
-    setReRender(!reRender);
+    reRenderPage();
   };
-
-  useEffect(() => {
-    //render all selected diets
-    axios({
-      method: "post",
-      url: "/api/user/myDiets",
-      data: {},
-    })
-      .then((response) => {
-        setUserDiets(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }, [reRender]);
 
   useEffect(() => {
     //render all selected diets
@@ -426,34 +409,13 @@ export default function Myprofile() {
       url: "/api/user/userIndices",
     })
       .then((response) => {
-        //setUserIndices(response.data);
-        console.log("Beatrice or Masha setUserIndices after response is working %s", JSON.stringify(response.data));
-        setUserIndices(response.data)
+        setUserIndices(response.data);
       })
       .catch((error) => {
         console.error(error);
       })
   }, [loggedin]);
       
-  useEffect(() => {
-
-    axios({
-      method: "post",
-      url: "/api/user/userIndices",
-      data: {
-        userIndices: userIndices,
-      },
-    })
-      .then((response) => {
-        //setUserIndices(response.data);
-        console.log("Beatrice or Masha setUserIndices after response is working %s", JSON.stringify(response.data));
-        //setUserIndices(response.data)
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-      
-  }, [userIndices]);
 
   //clicked the remove button on a food item
   const removeFood = (foodID) => {
@@ -465,14 +427,12 @@ export default function Myprofile() {
         Fid: foodID,
       },
     })
-      .then((response) => {
-        console.log("deleted %d, code: %s", foodID, response);
+      .then(() => {
+        reRenderPage(); //to redisplay updated dishes
       })
       .catch((error) => {
         console.error(error);
       });
-
-    reRenderPage(); //to redisplay updated dishes
   };
 
   //clicked the remove button on a diet item
@@ -484,14 +444,12 @@ export default function Myprofile() {
         Did: dietID,
       },
     })
-      .then((response) => {
-        console.log("deleted %d, code: %s", dietID, response);
+      .then(() => {
+        reRenderPage(); //to redisplay updated diets
       })
       .catch((error) => {
         console.error(error);
       });
-
-    reRenderPage(); //to redisplay updated diets
   };
 
   //clicked the remove button on an allergy item
@@ -503,14 +461,12 @@ export default function Myprofile() {
         Aid: allergyID,
       },
     })
-      .then((response) => {
-        console.log("deleted %d, code: %s", allergyID, response);
+      .then(() => {
+        reRenderPage(); //to redisplay updated allergies
       })
       .catch((error) => {
         console.error(error);
       });
-
-    reRenderPage(); //to redisplay updated diets
   };
 
   const addAllergy = async (allergyID) => {
@@ -566,15 +522,18 @@ export default function Myprofile() {
   };
 
   const reRenderPage = () => {
-    setReRender(!reRender);
+    setReRender((prev) => !prev);
   };
 
   const updateAllergyIndex = async (allergyID, value) => {
     let nextUserIndices = userIndices.slice();
     nextUserIndices[allergyID] = value;
     setUserIndices(nextUserIndices);
-    // console.log('event.target.value is: %s', value);
-    // console.log('allergID is %i', allergyID);
+    try {
+      await axios.post("/api/user/userIndices", { userIndices: { [allergyID]: value } });
+    } catch (error) {
+      console.error("Error saving allergy severity:", error);
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -594,50 +553,6 @@ export default function Myprofile() {
     let nextUserIndices = userIndices.slice();
     nextUserIndices[allergyID] = 0;
     setUserIndices(nextUserIndices);
-    // console.log('event.target.value is: %s', value);
-    // console.log('allergID is %i', allergyID);
-  }
-
-  function YourAllergies({
-    allergies,
-    removeAllergy,
-    allergyIndices,
-    updateAllergyIndex,
-  }) {
-    //console.log("allergyIndices are: ", allergyIndices)
-    //console.log("allergyindices[index]: ", allergyIndices[0])
-    return (
-      <div>
-        <h1> Your current allergies</h1>
-        {allergies.map((item, index) => (
-          <div className="item" key={index}>
-            <span className="item-name">{item.name}</span>
-  
-        <button
-          onClick={() => {
-            removeAllergy(allergies[index].id);
-            removeAllergyIndex(allergies[index].id);
-          }}
-        >
-          {" "}
-          Remove{" "}
-        </button>
-        <p1> How would you rate the severity of this allergy? </p1>
-        <select onChange={(event) => {
-          updateAllergyIndex(allergies[index].id, event.target.value); 
-          console.log("allergyIndices[i] %i", allergyIndices[index])}
-      
-        } value={allergyIndices[allergies[index].id]}>
-          <option value={0}>Rate Severity 1-3</option>
-          <option value={1}>1- Barely notice it</option>
-          <option value={2}>2- Problematic</option>
-          <option value={3}>3- Anaphylaxis</option>
-        {/* Add more allergy options */}
-        </select>
-      </div>
-        ))}
-    </div>
-    );
   }
 
 ////////////

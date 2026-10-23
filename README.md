@@ -26,42 +26,26 @@ Now let's jump back to the serious stuff: how to make this app run on your local
     where -u represents the user and "default_db" the name of the database; you may name this as you please.
     If you're on Windows, you can use mySQL Workbench or a VSCode extention.
     Yyou have a lot of flexibility with where the database is located.
-4. Update the initialize function server.js to your username, password, and database name.
-   This is the little snippet of the code from the server.js file where you need to enter your credentials:
-
-   const connection = await mysql.createConnection({
-   
-    host: "localhost",
-   
-    user: "---",
-   
-    password: "---",
-   
-    database: "---",
-   
-    ...
-  });
-6. Create a new email to send email notifications by:
+4. Tell the server how to reach your database with environment variables (defaults in brackets):
+    - `DB_HOST` [localhost]
+    - `DB_USER` [root]
+    - `DB_PASSWORD` [empty]
+    - `DB_NAME` [default_db]
+5. (Optional) Turn on email notifications with a Gmail app password:
     1. Create a new (personal) gmail account
     2. Go to your account settings by clicking on your profile icon (manage your account)
     3. Go to Security and set up 2-factor authentification
     4. Search for "app passwords" in the search bar
     5. Create a new app password and copy the generated app password
-  In the email() function in server.js (~line 1210), change the user and password fields to the new email and app password respectively. Also change the sender in
-        var mailOptions = {
-        from: "youremail@gmail.com"
-        ...
-        }
-  (API keys are not allowed, but please just use
-      user: "bitebriefnoreply2@gmail.com",
-      pass: "ttpl kwjf oiug qtcq",
-  if it doesn't work)
+    6. Set `EMAIL_USER` to the gmail address and `EMAIL_PASS` to the app password.
+       Emails go out once a day; set `EMAIL_INTERVAL_MS` to change that.
+    Never commit the password to the repo.
 
 
 ### Running this App
 
 1. Run "npm install" to install the dependencies for the app such as axios and express.
-2. Run "node server.js" to start the backend server. If this works without throwing an error then it means you did the database part right.
+2. Run "DB_PASSWORD=yourpassword node server.js" to start the backend server. If this works without throwing an error then it means you did the database part right.
 3. Run "npm start" IN A SEPARATE TERMINAL to start the react app. The website should now be visible in port 3000 and should be loading in data from the server on the rankings page.
 4. Google login is configured to only work on localhost and localhost:3000.
 

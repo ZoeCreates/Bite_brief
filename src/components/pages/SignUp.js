@@ -1,8 +1,7 @@
 import '../../App.css'
 import './SignUp.css'
 import { GoogleLogin } from '@react-oauth/google'
-import { jwtDecode } from 'jwt-decode'
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -11,30 +10,32 @@ import { useHistory } from 'react-router-dom'
 export default function SignUp({ loggedIn, setLoggedIn }) {
   const history = useHistory()
 
-  const login = async (response) => {
+  const toastOptions = {
+    position: 'bottom-right',
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: 'light',
+  }
+
+  const login = (response) => {
+    //the server checks the Google credential itself
     axios
       .post('/api/user', {
-        data: await jwtDecode(response.credential),
+        credential: response.credential,
       })
-      .then((response) => {
+      .then(() => {
         setLoggedIn(true)
+        toast.success('You have successfully logged in.', toastOptions)
+        history.push('/')
       })
       .catch((error) => {
         console.log(error)
+        toast.error('Login failed, please try again.', toastOptions)
       })
-
-    toast.success('You have successfully logged in.', {
-      position: 'bottom-right',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: 'light',
-    })
-
-    history.push('/')
   }
 
   return (

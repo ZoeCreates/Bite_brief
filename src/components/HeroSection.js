@@ -13,12 +13,10 @@ function HeroSection() {
     axios({
       method: "get",
       url: "/api/user/random",
-      data: { },
     })
       .then((response) => {
         setRandUser(response.data.user.username);
         setRandFact(response.data.user.fun_fact);
-        console.log("hm", randUser);
       })
       .catch((error) => {
         console.error(error);

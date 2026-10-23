@@ -3,14 +3,8 @@ import React, { useState, useEffect } from 'react';
 import './Trending.css';
 import axios from 'axios';
 
-const Trending = ({loggedIn}) => {
-  const [popularItems, setPopularItems] = useState([
-    { name: 'Item 1     ', likes: 10 },
-    { name: 'Item 2     ', likes: 15 },
-    { name: 'Item 3     ', likes: 20 },
-    { name: 'Item 4     ', likes: 25 },
-    { name: 'Item 5     ', likes: 30 }
-  ]);
+const Trending = () => {
+  const [popularItems, setPopularItems] = useState([]);
 
   useEffect(() => {
     axios({
@@ -18,13 +12,12 @@ const Trending = ({loggedIn}) => {
         url: '/api/favdishes',
     }) 
       .then(response => {
-        setPopularItems(response.data);
-        console.log("The trending items are" , popularItems)
+        setPopularItems(Array.isArray(response.data) ? response.data : []);
       })
       .catch(error => {
         console.error(error);
       });
-  }, [loggedIn]);
+  }, []);
 
   return (
     <div className="trending-container">

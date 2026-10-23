@@ -17,13 +17,7 @@ import "./Trending.css";
 import axios from "axios";
 
 const AllergySeverity = () => {
-  const [popularItems, setPopularItems] = useState([
-    { name: "Item 1     ", likes: 10 },
-    { name: "Item 2     ", likes: 15 },
-    { name: "Item 3     ", likes: 20 },
-    { name: "Item 4     ", likes: 25 },
-    { name: "Item 5     ", likes: 30 },
-  ]);
+  const [popularItems, setPopularItems] = useState([]);
 
   useEffect(() => {
     axios({
@@ -31,8 +25,7 @@ const AllergySeverity = () => {
       url: "/api/severeAllergies",
     })
       .then((response) => {
-        console.log(response.data)
-        setPopularItems(response.data);
+        setPopularItems(Array.isArray(response.data) ? response.data : []);
       })
       .catch((error) => {
         console.error(error);
@@ -46,7 +39,7 @@ const AllergySeverity = () => {
         {popularItems.slice(0, 10).map((item, index) => (
           <div className="item" key={index}>
             <span className="item-name">{item.name}</span>
-            <span className="item-likes">{item.likes}</span>
+            <span className="item-likes">{item.severity}</span>
           </div>
         ))}
       </div>

@@ -17,22 +17,20 @@ import AllergySeverity from "./components/pages/AllergySeverity";
 export const SignInContext = createContext(false);
 
 function App() {
-  const [userID, setUserID] = useState(0);
   const [loggedIn, setLoggedIn] = useState(false);
   useEffect(() => {
+    //stay logged in after a page refresh if the login cookie is still valid
     axios({
       method: "get",
       url: "/api/user/uid",
     })
       .then((response) => {
-        console.log("recieved id %s", JSON.stringify(response.data));
-        //setUserID(Number(response.data.userID));
-        //console.log("User id is %d", userID)
+        setLoggedIn(Boolean(response.data.userID));
       })
       .catch((error) => {
         console.error(error);
       });
-  }, [loggedIn]);
+  }, []);
 
   return (
     <>
@@ -50,7 +48,7 @@ function App() {
               </SignInContext.Provider>
             )}
           />
-          <Route path="/trending" component={Trending} loggedIn={loggedIn} />
+          <Route path="/trending" component={Trending} />
           <Route
             path="/sign-up"
             exact
@@ -64,11 +62,7 @@ function App() {
             exact
             render={() => <RecommendedDish loggedIn={loggedIn} />}
           />
-          <Route
-            path="/allergyseverity"
-            component={AllergySeverity}
-            loggedIn={loggedIn}
-          />
+          <Route path="/allergyseverity" component={AllergySeverity} />
         </Switch>
       </Router>
       <ToastContainer />

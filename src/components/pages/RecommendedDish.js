@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import "./RecommendedDish.css";
 
 export default function RecommendedDishes({ loggedIn }) {
-  const [userID, setUserID] = useState("0");
   const [mealPeriodID, setMealPeriodID] = useState("");
   const [recommendedDishes, setRecommendedDishes] = useState([]);
-  const [FavFoods, setFavFoods] = useState([Array().fill(null)]);
   const [isLoading, setIsLoading] = useState(false);
-  const [favoriteDishes, setFavoriteDishes] = useState([]);
 
   //function to shuffle the array and set display limit
   const shuffleAndLimitDishes = (dishes, limit) => {
@@ -27,12 +24,11 @@ export default function RecommendedDishes({ loggedIn }) {
 
     setIsLoading(true);
     try {
-      const response = await axios.get(
-        `/api/recommendeddish?userID=${0}&mealPeriodID=${mealPeriodID}`
-      );
+      const response = await axios.get("/api/recommendeddish", {
+        params: { mealPeriodID },
+      });
       const limitedDishes = shuffleAndLimitDishes(response.data, 20);
       setRecommendedDishes(limitedDishes);
-      console.log("Recommended Dishes:", response.data);
     } catch (error) {
       console.error("Error fetching recommended dishes:", error);
       alert("Failed to fetch recommended dishes.");
@@ -41,38 +37,13 @@ export default function RecommendedDishes({ loggedIn }) {
     }
   };
 
-  const fetchFavorites = async () => {
-    axios({
-      method: "post",
-      url: "/api/user/myFavDishes",
-      data: {
-        id: userID,
-      },
-    })
-      .then((response) => {
-        setFavFoods(response.data);
-        console.log(FavFoods);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
-
   const addToFavorites = async (foodID) => {
-    if (!userID) {
-      alert("User ID is required.");
-      return;
-    }
-
     try {
       const response = await axios.post("/api/user/addToFavorites", {
-        userID,
         foodID,
       });
       if (response.status === 200) {
         alert("Dish added to favorites successfully!");
-        console.log(response);
-        fetchFavorites(); // Re-fetch favorites to update the list
       } else {
         alert("Failed to add dish to favorites.");
       }
@@ -81,12 +52,6 @@ export default function RecommendedDishes({ loggedIn }) {
       alert("Failed to add dish to favorites.");
     }
   };
-
-  useEffect(() => {
-    if (userID) {
-      fetchFavorites(); // Fetch favorites when the userID is set or changed
-    }
-  }, [userID]);
 
   if (loggedIn) {
     return (
@@ -141,12 +106,6 @@ export default function RecommendedDishes({ loggedIn }) {
             })}
           </ul>
         )}
-        {/* <h2>Your Favorite Foods</h2> */}
-        <ul>
-          {favoriteDishes.map((dish) => (
-            <li key={dish.id}>{dish.name}</li>
-          ))}
-        </ul>
       </div>
     );
   } else {
