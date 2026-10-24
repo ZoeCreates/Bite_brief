@@ -5,7 +5,7 @@ import React from 'react'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import { useHistory } from 'react-router-dom'
+import { useHistory, Link } from 'react-router-dom'
 
 export default function SignUp({ loggedIn, setLoggedIn }) {
   const history = useHistory()
@@ -55,7 +55,10 @@ export default function SignUp({ loggedIn, setLoggedIn }) {
           }}
         />
         <p style={{ paddingTop: '8px', fontSize: '12px' }}>
-          By creating an account, you agree to our Terms & Privacy
+          By signing in, you agree to our{' '}
+          <Link to='/privacy' style={{ color: 'white', textDecoration: 'underline' }}>
+            Privacy Policy
+          </Link>
         </p>
       </div>
     </div>

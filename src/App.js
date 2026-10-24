@@ -13,6 +13,7 @@ import RecommendedDish from "./components/pages/RecommendedDish";
 import { ToastContainer } from 'react-toastify';
 
 import AllergySeverity from "./components/pages/AllergySeverity";
+import Privacy from "./components/pages/Privacy";
 
 export const SignInContext = createContext(false);
 
@@ -63,6 +64,7 @@ function App() {
             render={() => <RecommendedDish loggedIn={loggedIn} />}
           />
           <Route path="/allergyseverity" component={AllergySeverity} />
+          <Route path="/privacy" component={Privacy} />
         </Switch>
       </Router>
       <ToastContainer />

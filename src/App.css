@@ -48,6 +48,23 @@
   margin: 50px; /* Add margin between paragraphs */
 }
 
+.privacy {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 16px;
+  color: rgb(0, 0, 0);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.privacy h2 {
+  margin-top: 24px;
+}
+
+.privacy ul {
+  padding-left: 24px;
+}
+
 .sign-up {
   background-position: center;
   background-size: cover;
