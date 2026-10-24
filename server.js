@@ -17,7 +17,7 @@ const { OAuth2Client } = require("google-auth-library");
 //must match the clientId in src/index.js
 const GOOGLE_CLIENT_ID =
   process.env.GOOGLE_CLIENT_ID ||
-  "680142103979-ahonidcp8bvl73hc5ncghsj0v5igt52b.apps.googleusercontent.com";
+  "270825436286-0m6k81c8eh6csonalrjrth42vg4tt5r4.apps.googleusercontent.com";
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 //cookies are signed so users can't just edit curUserId to become someone else.
